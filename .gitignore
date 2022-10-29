@@ -63,4 +63,8 @@ buck-out/
 /ios/Pods/
 /vendor/bundle/
 
+# App
 **/secrets.js
+
+# Firebase
+**/google-services.json
