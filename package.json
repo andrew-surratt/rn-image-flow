@@ -1,0 +1,19 @@
+{
+  "name": "rn-image-flow",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "android": "react-native run-android",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "react-native start"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "expo": "^46.0.16",
+    "firebase": "^9.12.1",
+    "react": "^18.1.0",
+    "react-native": "^0.70.3"
+  }
+}
