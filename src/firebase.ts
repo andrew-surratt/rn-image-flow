@@ -1,8 +1,8 @@
 import { utils } from '@react-native-firebase/app';
-import {ImageInfo} from 'expo-image-picker';
+import { ImageInfo } from 'expo-image-picker';
 import uuid from 'react-native-uuid';
 import storage from '@react-native-firebase/storage';
-import {ImagePickerResult} from 'expo-image-picker/src/ImagePicker.types';
+import { ImagePickerResult } from 'expo-image-picker/src/ImagePicker.types';
 
 // Initialize Firebase
 export const initializeFirebase = () => {
@@ -15,7 +15,7 @@ export async function uploadToFirebase(
   imagePickerResult: ImageInfo,
   refPath = String(uuid.v4())
 ): Promise<string | null> {
-  console.log('uuid', refPath);
+  console.log('Firebase Image uuid', refPath);
   if (imagePickerResult.base64) {
     const ref = storage().ref().child(refPath);
     await ref.putString(imagePickerResult.base64, 'base64');
@@ -24,7 +24,9 @@ export async function uploadToFirebase(
   return null;
 }
 
-export async function getDownloadUrl(refPath = String(uuid.v4())): Promise<string> {
+export async function getDownloadUrl(
+  refPath = String(uuid.v4())
+): Promise<string> {
   return await storage().ref(refPath).getDownloadURL();
 }
 
