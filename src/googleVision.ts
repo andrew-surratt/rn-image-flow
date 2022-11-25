@@ -1,16 +1,19 @@
-import {cloudAPIKey} from '../config/secrets';
+import { cloudAPIKey } from '../config/secrets';
 import config from '../config/config';
-import {GoogleCloudVisionRequest, GoogleCloudVisionResponse} from './types';
-import {google} from '@google-cloud/vision/build/protos/protos';
+import { GoogleCloudVisionRequest, GoogleCloudVisionResponse } from './types';
+import { google } from '@google-cloud/vision/build/protos/protos';
 import Type = google.cloud.vision.v1.Feature.Type;
 
-async function getGoogleVisionResult(image: string): Promise<GoogleCloudVisionResponse> {
+async function getGoogleVisionResult(
+  image: string
+): Promise<GoogleCloudVisionResponse> {
   const googleCloudVisionRequest: GoogleCloudVisionRequest = {
     requests: [
       {
         features: [
-          {type: Type.LABEL_DETECTION, maxResults: 1},
-          {type: Type.TEXT_DETECTION, maxResults: 1},
+          // TODO: make configurable
+          { type: Type.LABEL_DETECTION, maxResults: 2 },
+          { type: Type.TEXT_DETECTION, maxResults: 2 },
         ],
         image: {
           source: {
@@ -22,7 +25,7 @@ async function getGoogleVisionResult(image: string): Promise<GoogleCloudVisionRe
   };
   const body = JSON.stringify(googleCloudVisionRequest);
 
-  let response = await fetch(
+  const response = await fetch(
     `${config.googleCloudVisionApi}${config.googleCloudImagePath}?${config.googleCloudKeyParam}=${cloudAPIKey}`,
     {
       headers: {
@@ -33,8 +36,8 @@ async function getGoogleVisionResult(image: string): Promise<GoogleCloudVisionRe
       body: body,
     }
   );
-  let responseJson: GoogleCloudVisionResponse = await response.json();
-  console.log(`imageResponses`, responseJson);
+  const responseJson: GoogleCloudVisionResponse = await response.json();
+  console.log(`Google Cloud response: ${JSON.stringify(responseJson)}`);
   return responseJson;
 }
 
