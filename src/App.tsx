@@ -1,300 +1,79 @@
-import React, {useState} from 'react';
-import {Image, Linking, SafeAreaView, ScrollView, View} from 'react-native';
+import React from 'react';
+import {SafeAreaView} from 'react-native';
 import {
-  ImagePickerOptions,
-  launchCameraAsync,
-  launchImageLibraryAsync,
-  MediaTypeOptions,
-} from 'expo-image-picker';
-import {ImagePickerResult} from 'expo-image-picker/src/ImagePicker.types';
-import {
-  ActivityIndicator,
-  Appbar,
-  Button,
   DefaultTheme,
-  List,
   Provider as PaperProvider,
   Theme,
 } from 'react-native-paper';
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
-import {initializeFirebase, uploadImage} from './firebase';
-import styles from './styles';
-import getGoogleVisionResult from './googleVision';
-import {GoogleCloudVisionResponse, ImageData, isImageInfo} from './types';
+import {initializeFirebase} from './firebase';
+import {Home} from './route/home';
+import ImagePreview from './route/imagePreview';
+import VisionResults from './route/visionResults';
 
-const initialVisionResults: GoogleCloudVisionResponse = {
-  'responses': [{
-    'labelAnnotations': [{
-      'mid': '/m/0h8n1g1',
-      'description': 'Automotive parking light',
-      'score': 0.94150746,
-      'topicality': 0.94150746
-    }, {'mid': '/m/0768fx', 'description': 'Automotive lighting', 'score': 0.9212488, 'topicality': 0.9212488}],
-    'textAnnotations': [{
-      'locale': 'und',
-      'description': '4R',
-      'boundingPoly': {
-        'vertices': [{'x': 929, 'y': 944}, {'x': 1299, 'y': 944}, {'x': 1299, 'y': 1270}, {
-          'x': 929,
-          'y': 1270
-        }]
-      }
-    }, {
-      'description': '4R',
-      'boundingPoly': {
-        'vertices': [{'x': 940, 'y': 944}, {'x': 1299, 'y': 957}, {'x': 1288, 'y': 1270}, {
-          'x': 929,
-          'y': 1257
-        }]
-      }
-    }],
-    'fullTextAnnotation': {
-      'pages': [{
-        'width': 3024,
-        'height': 3024,
-        'blocks': [{
-          'boundingBox': {
-            'vertices': [{'x': 940, 'y': 944}, {'x': 1299, 'y': 957}, {
-              'x': 1288,
-              'y': 1270
-            }, {'x': 929, 'y': 1257}]
-          },
-          'paragraphs': [{
-            'boundingBox': {
-              'vertices': [{'x': 940, 'y': 944}, {'x': 1299, 'y': 957}, {
-                'x': 1288,
-                'y': 1270
-              }, {'x': 929, 'y': 1257}]
-            },
-            'words': [{
-              'boundingBox': {
-                'vertices': [{'x': 940, 'y': 944}, {'x': 1299, 'y': 957}, {
-                  'x': 1288,
-                  'y': 1270
-                }, {'x': 929, 'y': 1257}]
-              },
-              'symbols': [{
-                'boundingBox': {
-                  'vertices': [{'x': 940, 'y': 944}, {'x': 1116, 'y': 950}, {
-                    'x': 1105,
-                    'y': 1263
-                  }, {'x': 929, 'y': 1257}]
-                }, 'text': '4'
-              }, {
-                'property': {'detectedBreak': {'type': 'LINE_BREAK'}},
-                'boundingBox': {
-                  'vertices': [{'x': 1116, 'y': 950}, {'x': 1299, 'y': 956}, {
-                    'x': 1288,
-                    'y': 1269
-                  }, {'x': 1105, 'y': 1263}]
-                },
-                'text': 'R'
-              }]
-            }]
-          }],
-          'blockType': 'TEXT'
-        }]
-      }], 'text': '4R'
-    }
-  }]
+const Stack = createNativeStackNavigator();
+
+const theme: Theme = {
+  ...DefaultTheme,
+  colors: {
+    primary: "rgb(0, 104, 116)",
+    onPrimary: "rgb(255, 255, 255)",
+    primaryContainer: "rgb(151, 240, 255)",
+    onPrimaryContainer: "rgb(0, 31, 36)",
+    secondary: "rgb(74, 98, 103)",
+    onSecondary: "rgb(255, 255, 255)",
+    secondaryContainer: "rgb(205, 231, 236)",
+    onSecondaryContainer: "rgb(5, 31, 35)",
+    tertiary: "rgb(82, 94, 125)",
+    onTertiary: "rgb(255, 255, 255)",
+    tertiaryContainer: "rgb(218, 226, 255)",
+    onTertiaryContainer: "rgb(14, 27, 55)",
+    error: "rgb(186, 26, 26)",
+    onError: "rgb(255, 255, 255)",
+    errorContainer: "rgb(255, 218, 214)",
+    onErrorContainer: "rgb(65, 0, 2)",
+    background: "rgb(250, 253, 253)",
+    onBackground: "rgb(25, 28, 29)",
+    surface: "rgb(250, 253, 253)",
+    onSurface: "rgb(25, 28, 29)",
+    surfaceVariant: "rgb(219, 228, 230)",
+    onSurfaceVariant: "rgb(63, 72, 74)",
+    outline: "rgb(111, 121, 122)",
+    outlineVariant: "rgb(191, 200, 202)",
+    shadow: "rgb(0, 0, 0)",
+    scrim: "rgb(0, 0, 0)",
+    inverseSurface: "rgb(46, 49, 50)",
+    inverseOnSurface: "rgb(239, 241, 241)",
+    inversePrimary: "rgb(79, 216, 235)",
+    elevation: {
+      level0: "transparent",
+      level1: "rgb(238, 246, 246)",
+      level2: "rgb(230, 241, 242)",
+      level3: "rgb(223, 237, 238)",
+      level4: "rgb(220, 235, 237)",
+      level5: "rgb(215, 232, 234)"
+    },
+    surfaceDisabled: "rgba(25, 28, 29, 0.12)",
+    onSurfaceDisabled: "rgba(25, 28, 29, 0.38)",
+    backdrop: "rgba(41, 50, 52, 0.4)"
+  },
+  roundness: 10,
 };
 
 const App = () => {
-  const [uploading, setUploading] = useState<boolean>(false);
-  const [image, setImage] = useState<string>('https://firebasestorage.googleapis.com/v0/b/intricate-karma-365022.appspot.com/o/6211d08d-8fe9-47d1-9e1b-63981c19f69e?alt=media&token=5ed6bfd2-41cc-48f1-898d-8353a4bb2d37');
-  const [imageData, setImageData] = useState<ImageData | undefined>({
-    latitude: '35.234855555555555',
-    longitude: '-80.81829166666667',
-  });
-  const [visionResults, setVisionResults] =
-    useState<GoogleCloudVisionResponse>(initialVisionResults);
-
   initializeFirebase();
-
-  // Todo: update function names and remove fluff
-  const activityIndicator = (activity: boolean): JSX.Element => {
-    return activity ? <ActivityIndicator/> : <></>;
-  };
-
-  const imagePreview = (imagePreviewUri: string | undefined): JSX.Element => {
-    return imagePreviewUri ? (
-      <View style={styles.imageBoxStyle}>
-        <Image style={styles.imageStyle} source={{uri: imagePreviewUri}}/>
-        <Button
-          style={styles.visionButtonStyle}
-          icon="camera"
-          mode="contained"
-          onPress={submitToGoogle}
-        >
-          Start
-        </Button>
-      </View>
-    ) : (
-      <></>
-    );
-  };
-
-  const imagePickerOptions: ImagePickerOptions = {
-    allowsEditing: true,
-    aspect: [1, 1],
-    mediaTypes: MediaTypeOptions.Images,
-    base64: true,
-    exif: true,
-  };
-
-  const openCamera = async () => {
-    const pickerResult: ImagePickerResult = await launchCameraAsync(
-      imagePickerOptions
-    );
-
-    await handleImage(pickerResult);
-  };
-
-  const openGallery = async () => {
-    const pickerResult: ImagePickerResult =
-      await launchImageLibraryAsync<ImagePickerOptions>(imagePickerOptions);
-
-    await handleImage(pickerResult);
-  };
-
-  const handleImage = async (pickerResult: ImagePickerResult) => {
-    try {
-      setUploading(true);
-
-      if (isImageInfo(pickerResult)) {
-        console.log(`Image Properties: ${JSON.stringify(pickerResult.exif)}`);
-        if (pickerResult.exif?.GPSLatitude && pickerResult.exif?.GPSLongitude) {
-          setImageData({
-            latitude: pickerResult.exif.GPSLatitude,
-            longitude: pickerResult.exif.GPSLongitude,
-          });
-        }
-        const uploadUrl: string | null = await uploadImage(pickerResult);
-        if (uploadUrl) {
-          setImage(uploadUrl);
-        }
-      } else {
-        console.log('Image Picker Cancelled.');
-      }
-    } catch (e) {
-      console.error('Image Picker error', e);
-    } finally {
-      setUploading(false);
-    }
-  };
-
-  const submitToGoogle = async () => {
-    setUploading(true);
-    try {
-      if (image) {
-        const response: GoogleCloudVisionResponse = await getGoogleVisionResult(
-          image
-        );
-        setVisionResults(response);
-      }
-    } catch (error) {
-      console.log('Google Cloud error', error);
-    } finally {
-      setUploading(false);
-    }
-  };
-
-  const theme: Theme = {
-    ...DefaultTheme,
-    colors: {
-      ...DefaultTheme.colors,
-      primary: 'gray',
-    },
-  };
-
-  /**
-   * TODO: Open app based on vision results.
-   */
-  const openApp = () => {
-    const title = 'Parking';
-    const description = visionResults.responses[0]?.textAnnotations[0]?.description;
-    const location = imageData ? `${imageData.latitude}, ${imageData.longitude}` : '';
-    const getGCalDate = (addMinutes = 0) => {
-      const now = new Date();
-      now.setMinutes(now.getMinutes() + addMinutes);
-      return `${now.toISOString().slice(0, 19).replaceAll(':', '').replaceAll('-', '')}Z`;
-    };
-    const start = getGCalDate();
-    const end = getGCalDate(60);
-    const googleCalDeepLink = `https://www.google.com/calendar/render`;
-    const gCalActionParam = `action`;
-    const gCalCreateAction = `TEMPLATE`;
-    Linking.openURL(
-      `${googleCalDeepLink}?${gCalActionParam}=${gCalCreateAction}&text=${title}&details=${description}&location=${location}&dates=${start}%2F${end}`
-    );
-  };
-
-  /**
-   * TODO: remove or format
-   */
-  const visionResultsPreview = () => {
-    const resultsList = visionResults &&
-      visionResults?.responses[0]?.labelAnnotations
-        ?.map((label, key) => {
-          return (
-            <List.Item
-              key={`label${key}`}
-              title={label.description}
-              description={`Score: ${label.score}, Topicality: ${label.topicality}`}
-              titleStyle={styles.visionTextStyle}
-              descriptionStyle={styles.visionTextStyle}
-            />
-          );
-        })
-        .concat(
-          visionResults?.responses[0]?.textAnnotations?.map(
-            (text, key) => (
-              <List.Item
-                key={`text${key}`}
-                title={text.description}
-                description={`Score: ${text.score}, Confidence: ${text.confidence}`}
-                titleStyle={styles.visionTextStyle}
-                descriptionStyle={styles.visionTextStyle}
-              />
-            )
-          )
-        );
-    return <ScrollView style={styles.visionResultsStyle}>{resultsList}</ScrollView>;
-  };
-
-  const startFlowEl: JSX.Element = visionResults ? (
-    <View>
-      <Button mode="contained" onPress={openApp}>
-        Start Configured Flow?
-      </Button>
-    </View>
-  ) : (
-    <></>
-  );
-
-  const imagePickerEl: JSX.Element = <View style={styles.imageButtonsStyle}>
-    <Button icon="camera" mode="contained" onPress={openGallery}>
-      Choose from Gallery
-    </Button>
-    <Button icon="camera" mode="contained" onPress={openCamera}>
-      Take Photo
-    </Button>
-  </View>;
 
   return (
     <PaperProvider theme={theme}>
-      <SafeAreaView>
-        <Appbar.Header style={styles.headerStyle}>
-          <Appbar.Content title="Image Flow"/>
-        </Appbar.Header>
-        <View style={styles.contentStyle}>
-          {startFlowEl}
-          {imagePreview(image)}
-          {visionResultsPreview()}
-          {activityIndicator(uploading)}
-          {imagePickerEl}
-        </View>
-      </SafeAreaView>
+      <NavigationContainer>
+          <Stack.Navigator initialRouteName="Home">
+            <Stack.Screen name="Home" component={Home} />
+            <Stack.Screen name="Image Preview" component={ImagePreview} />
+            <Stack.Screen name="Vision Results" component={VisionResults} />
+          </Stack.Navigator>
+      </NavigationContainer>
     </PaperProvider>
   );
 };
