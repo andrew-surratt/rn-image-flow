@@ -6,6 +6,9 @@ import com.facebook.react.ReactRootView;
 
 import expo.modules.ReactActivityDelegateWrapper;
 
+// Added for @react-navigation/native
+import android.os.Bundle;
+
 public class MainActivity extends ReactActivity {
 
   /**
@@ -15,6 +18,14 @@ public class MainActivity extends ReactActivity {
   @Override
   protected String getMainComponentName() {
     return "rnimageflow";
+  }
+
+  /**
+   * Added for @react-navigation/native
+   */
+  @Override
+  protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(null);
   }
 
   /**

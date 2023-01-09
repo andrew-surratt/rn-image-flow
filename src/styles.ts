@@ -5,37 +5,47 @@ const styles = StyleSheet.create({
     backgroundColor: 'black',
   },
   contentStyle: {
+    display: 'flex',
     flexDirection: 'column',
-    width: '100%',
     height: '100%',
   },
   imageBoxStyle: {
     margin: 10,
+    display: 'flex',
     flexDirection: 'column',
-    alignItems: 'center',
-    height: '40%',
+    height: '100%'
   },
   imageStyle: {
     aspectRatio: 1,
-    height: '80%',
-    margin: 5,
-    flex: 1,
+    maxHeight: '50%',
+    flexBasis: 'auto',
+    flexGrow: 1,
+    flexShrink: 1,
+    justifyContent: 'space-evenly'
   },
   visionButtonStyle: {
-    margin: 5,
-    width: '100%',
-    maxHeight: '20%'
+    marginTop: 20,
+    marginBottom: 30,
+    flexBasis: 'auto',
+    flexGrow: 3,
+    flexShrink: 1,
+    justifyContent: 'space-evenly'
+  },
+  imageButtonsViewStyle: {
+    display: 'flex',
+    flexDirection: 'column',
+    height: '100%',
   },
   imageButtonsStyle: {
-    justifyContent: 'flex-end',
-    margin: 5,
-    height: '10%'
+    margin: 10,
+    flexBasis: 'auto',
+    flexGrow: 1,
+    flexShrink: 1,
   },
   visionResultsStyle: {
-    margin: 5,
-    flex: 1,
-    width: '100%',
-    maxHeight: '20%'
+    flexBasis: 'auto',
+    flexGrow: 1,
+    flexShrink: 1,
   },
   visionTextStyle: {
     color: 'white'

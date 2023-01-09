@@ -1,5 +1,5 @@
 import { cloudAPIKey } from '../config/secrets';
-import config from '../config/config';
+import config from './config/config';
 import { GoogleCloudVisionRequest, GoogleCloudVisionResponse } from './types';
 import { google } from '@google-cloud/vision/build/protos/protos';
 import Type = google.cloud.vision.v1.Feature.Type;

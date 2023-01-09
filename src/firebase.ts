@@ -15,13 +15,24 @@ export async function uploadToFirebase(
   imagePickerResult: ImageInfo,
   refPath = String(uuid.v4())
 ): Promise<string | null> {
-  console.log('Firebase Image uuid', refPath);
-  if (imagePickerResult.base64) {
-    const ref = storage().ref().child(refPath);
-    await ref.putString(imagePickerResult.base64, 'base64');
-    return refPath;
-  }
-  return null;
+  return new Promise((resolve, reject) => {
+    console.log('Firebase Image uuid', refPath);
+    if (imagePickerResult.base64) {
+      const ref = storage().ref().child(refPath);
+      const task = ref.putString(imagePickerResult.base64, 'base64');
+      const THIRTY_SECONDS_AS_MS = 30 * 1000;
+      const timeout = setTimeout(() => {
+        console.log('cancelling');
+        task.cancel();
+        reject('Cancelled');
+      }, THIRTY_SECONDS_AS_MS);
+      task.then(() => {
+        console.log(`Firebase task: ${task}`);
+        clearTimeout(timeout);
+        resolve(refPath);
+      });
+    }
+  });
 }
 
 export async function getDownloadUrl(
