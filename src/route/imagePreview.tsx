@@ -1,18 +1,18 @@
-import {GoogleCloudVisionResponse, ImageData} from '../types';
-import getGoogleVisionResult from '../googleVision';
-import {Image, View} from 'react-native';
-import {ActivityIndicator, Appbar, Button} from 'react-native-paper';
-import React, {useEffect, useState} from 'react';
+import { GoogleCloudVisionResponse } from '../types';
+import getGoogleVisionResult from '../service/googleVision';
+import { Image, View } from 'react-native';
+import { ActivityIndicator, Button } from 'react-native-paper';
+import React, { useEffect, useState } from 'react';
 import styles from '../styles';
 import { appStorage } from '../storage/appStorage';
-import {RootStackParamList} from './types';
-import {NativeStackNavigationProp} from '@react-navigation/native-stack/src/types';
+import { RootStackParamList } from './types';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack/src/types';
 
 type Props = {
-  navigation: NativeStackNavigationProp<RootStackParamList, 'Image Preview'>
-}
+  navigation: NativeStackNavigationProp<RootStackParamList, 'Image Preview'>;
+};
 
-const ImagePreview  = ({navigation}: Props) => {
+const ImagePreview = ({ navigation }: Props) => {
   const [uploading, setUploading] = useState<boolean>(false);
   const [image, setImage] = useState<string | null>(null);
 
@@ -29,7 +29,7 @@ const ImagePreview  = ({navigation}: Props) => {
       console.log(`Image URL: ${storedImage}`);
     }
     getImageData();
-  }, []);
+  }, [navigation]);
 
   const submitToGoogle = async () => {
     setUploading(true);
@@ -51,9 +51,10 @@ const ImagePreview  = ({navigation}: Props) => {
   const imagePreview = (imagePreviewUri: string | null): JSX.Element => {
     return imagePreviewUri ? (
       <View style={styles.imageBoxStyle}>
-        <Image style={styles.imageStyle} source={{uri: imagePreviewUri}}/>
+        <Image style={styles.imageStyle} source={{ uri: imagePreviewUri }} />
         <Button
           style={styles.visionButtonStyle}
+          labelStyle={styles.imageButtonsLabelStyle}
           icon="camera"
           mode="contained"
           uppercase={false}
@@ -70,7 +71,7 @@ const ImagePreview  = ({navigation}: Props) => {
   return (
     <View style={styles.contentStyle}>
       {imagePreview(image)}
-      {uploading ? <ActivityIndicator/> : <></>}
+      {uploading ? <ActivityIndicator /> : <></>}
     </View>
   );
 };

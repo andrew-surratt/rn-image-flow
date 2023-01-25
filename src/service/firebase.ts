@@ -20,7 +20,10 @@ export async function uploadToFirebase(
     if (imagePickerResult.base64) {
       const ref = storage().ref().child(refPath);
       const task = ref.putString(imagePickerResult.base64, 'base64');
+      // Todo: create config
       const THIRTY_SECONDS_AS_MS = 30 * 1000;
+
+      // If the network connection times out, cancel the task
       const timeout = setTimeout(() => {
         console.log('cancelling');
         task.cancel();

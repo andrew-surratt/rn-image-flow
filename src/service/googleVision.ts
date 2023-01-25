@@ -1,6 +1,6 @@
-import { cloudAPIKey } from '../config/secrets';
-import config from './config/config';
-import { GoogleCloudVisionRequest, GoogleCloudVisionResponse } from './types';
+import { cloudAPIKey } from '../../config/secrets';
+import config from '../config/config';
+import { GoogleCloudVisionRequest, GoogleCloudVisionResponse } from '../types';
 import { google } from '@google-cloud/vision/build/protos/protos';
 import Type = google.cloud.vision.v1.Feature.Type;
 
@@ -11,9 +11,14 @@ async function getGoogleVisionResult(
     requests: [
       {
         features: [
-          // TODO: make configurable
-          { type: Type.LABEL_DETECTION, maxResults: 2 },
-          { type: Type.TEXT_DETECTION, maxResults: 2 },
+          {
+            type: Type.LABEL_DETECTION,
+            maxResults: config.googleCloudMaxResults,
+          },
+          {
+            type: Type.TEXT_DETECTION,
+            maxResults: config.googleCloudMaxResults,
+          },
         ],
         image: {
           source: {

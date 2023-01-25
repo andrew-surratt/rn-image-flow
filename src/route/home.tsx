@@ -1,20 +1,26 @@
-import {ActivityIndicator, Button} from 'react-native-paper';
+import { ActivityIndicator, Button } from 'react-native-paper';
 import styles from '../styles';
-import {View} from 'react-native';
-import React, {useEffect, useState} from 'react';
-import {isImageInfo} from '../types';
-import {uploadImage} from '../firebase';
-import {ImagePickerOptions, launchCameraAsync, launchImageLibraryAsync, MediaTypeOptions} from 'expo-image-picker';
-import {ImagePickerResult} from 'expo-image-picker/src/ImagePicker.types';
-import {appStorage} from '../storage/appStorage';
-import {RootStackParamList} from './types';
-import {NativeStackNavigationProp} from '@react-navigation/native-stack/src/types';
+import { View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { isImageInfo } from '../types';
+import { uploadImage } from '../service/firebase';
+import {
+  ImagePickerOptions,
+  launchCameraAsync,
+  launchImageLibraryAsync,
+  MediaTypeOptions,
+} from 'expo-image-picker';
+import { ImagePickerResult } from 'expo-image-picker/src/ImagePicker.types';
+import { appStorage } from '../storage/appStorage';
+import { RootStackParamList } from './types';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack/src/types';
+import { CameraRoll } from '@react-native-camera-roll/camera-roll';
 
 type Props = {
-  navigation: NativeStackNavigationProp<RootStackParamList, 'Home'>
-}
+  navigation: NativeStackNavigationProp<RootStackParamList, 'Home'>;
+};
 
-const Home = ({navigation}: Props) => {
+const Home = ({ navigation }: Props) => {
   const [uploading, setUploading] = useState<boolean>(false);
 
   useEffect(() => {
@@ -25,7 +31,7 @@ const Home = ({navigation}: Props) => {
       }
     }
     getStoredImage();
-  }, []);
+  }, [navigation]);
 
   const imagePickerOptions: ImagePickerOptions = {
     allowsEditing: true,
@@ -69,6 +75,11 @@ const Home = ({navigation}: Props) => {
     const pickerResult: ImagePickerResult = await launchCameraAsync(
       imagePickerOptions
     );
+    console.log(`Camera result ${JSON.stringify(pickerResult)}`);
+    if (isImageInfo(pickerResult)) {
+      const rollUri: string = await CameraRoll.save(pickerResult.uri);
+      console.log(`Image saved to ${rollUri}`);
+    }
 
     await handleImage(pickerResult);
   };
@@ -80,18 +91,34 @@ const Home = ({navigation}: Props) => {
     await handleImage(pickerResult);
   };
 
-  const imagePickerEl: JSX.Element = <View style={styles.imageButtonsViewStyle}>
-    <Button icon="camera" mode="contained" uppercase={false} onPress={openGallery} style={styles.imageButtonsStyle}>
-      Choose from Gallery
-    </Button>
-    <Button icon="camera" mode="contained" uppercase={false} onPress={openCamera} style={styles.imageButtonsStyle}>
-      Take Photo
-    </Button>
-  </View>;
+  const imagePickerEl: JSX.Element = (
+    <View style={styles.imageButtonsViewStyle}>
+      <Button
+        icon="camera"
+        mode="contained"
+        uppercase={false}
+        onPress={openGallery}
+        style={styles.imageButtonsStyle}
+        labelStyle={styles.imageButtonsLabelStyle}
+      >
+        Choose from Gallery
+      </Button>
+      <Button
+        icon="camera"
+        mode="contained"
+        uppercase={false}
+        onPress={openCamera}
+        style={styles.imageButtonsStyle}
+        labelStyle={styles.imageButtonsLabelStyle}
+      >
+        Take Photo
+      </Button>
+    </View>
+  );
 
   return (
     <View style={styles.contentStyle}>
-      {uploading ? <ActivityIndicator/> : <></>}
+      {uploading ? <ActivityIndicator /> : <></>}
       {imagePickerEl}
     </View>
   );
