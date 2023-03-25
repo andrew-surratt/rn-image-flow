@@ -1,11 +1,19 @@
 {
   "name": "rn-image-flow",
-  "version": "1.0.0",
-  "description": "",
+  "version": "1.0.1",
+  "description": "React Native image flow",
   "main": "index.js",
   "repository": {
     "url": "https://github.com/andrew-surratt/rn-image-flow"
   },
+  "keywords": [
+    "react",
+    "native",
+    "image",
+    "google",
+    "computer",
+    "vision"
+  ],
   "scripts": {
     "android": "react-native run-android",
     "clean": "cd android && ./gradlew clean ; cd ..",
@@ -20,7 +28,7 @@
   "engines": {
     "node": ">=14"
   },
-  "author": "",
+  "author": "Andrew Surratt",
   "license": "ISC",
   "dependencies": {
     "@react-native-async-storage/async-storage": "^1.17.11",
