@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
+  "repository": {
+    "url": "https://github.com/andrew-surratt/rn-image-flow"
+  },
   "scripts": {
     "android": "react-native run-android",
     "clean": "cd android && ./gradlew clean ; cd ..",

@@ -1,6 +1,7 @@
 import { AdapterId, AdapterType, Config } from './types';
 
 const config: Config = {
+  networkTimeoutInSeconds: 30,
   googleCloudImagePath: '/images:annotate',
   googleCloudKeyParam: 'key',
   googleCloudVisionApi: 'https://vision.googleapis.com/v1',
@@ -44,9 +45,28 @@ const config: Config = {
       ],
       action: {
         id: AdapterId.GoogleCalendar,
+        values: [
+          {
+            id: '1',
+            value: 'Parking',
+          },
+        ],
       },
     },
   ],
+  defaultFlow: {
+    labelAnnotations: [],
+    textAnnotations: [],
+    action: {
+      id: AdapterId.GoogleCalendar,
+      values: [
+        {
+          id: '1',
+          value: 'Note',
+        },
+      ],
+    },
+  },
 };
 
 export default config;

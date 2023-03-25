@@ -12,11 +12,10 @@ import { appStorage } from '../storage/appStorage';
 import { RootStackParamList } from './types';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack/src/types';
 import config from '../config/config';
-import { Adapter, AdapterType } from '../config/types';
+import { AdapterType, Flow, FlowAction } from '../config/types';
 
 const VisionResultsPreview = (
-  visionResults?: GoogleCloudVisionResponse | GoogleCloudVisionError,
-  targetFlow?: Adapter
+  visionResults?: GoogleCloudVisionResponse | GoogleCloudVisionError
 ) => {
   const resultsList = isGoogleCloudVisionError(visionResults) ? (
     <Text style={styles.visionResultsTextStyle}>
@@ -24,7 +23,11 @@ const VisionResultsPreview = (
     </Text>
   ) : (
     <List.AccordionGroup>
-      <List.Accordion titleStyle={styles.visionTextStyle} title={'Labels Found'} id={1}>
+      <List.Accordion
+        titleStyle={styles.visionTextStyle}
+        title={'Labels Found'}
+        id={1}
+      >
         {visionResults?.responses[0]?.labelAnnotations?.map((label, key) => {
           return (
             <List.Item
@@ -38,7 +41,11 @@ const VisionResultsPreview = (
           );
         })}
       </List.Accordion>
-      <List.Accordion title={'Text Found'} titleStyle={styles.visionTextStyle} id={2}>
+      <List.Accordion
+        title={'Text Found'}
+        titleStyle={styles.visionTextStyle}
+        id={2}
+      >
         {visionResults?.responses[0]?.textAnnotations?.map((text, key) => (
           <List.Item
             key={`text${key}`}
@@ -62,7 +69,7 @@ type Props = {
 
 const calculateBestTargetFlow = (
   visionResults?: GoogleCloudVisionResponse
-): Adapter | undefined => {
+): Flow => {
   for (const flow of config.flows) {
     const visionResponse = visionResults?.responses[0];
     const containsLabel: boolean =
@@ -76,10 +83,16 @@ const calculateBestTargetFlow = (
           text.description && flow.textAnnotations.includes(text.description)
       ) || false;
     if (containsLabel || containsText) {
-      return config.adapters.find((adapter) => adapter.id === flow.action.id);
+      flow.action.adapter = config.adapters.find(
+        (adapter) => adapter.id === flow.action.id
+      );
+      return flow;
     }
   }
-  return undefined;
+  config.defaultFlow.action.adapter = config.adapters.find(
+    (adapter) => adapter.id === config.defaultFlow.action.id
+  );
+  return config.defaultFlow;
 };
 
 /**
@@ -100,7 +113,7 @@ const VisionResults = ({}: Props) => {
   const [visionResults, setVisionResults] =
     useState<GoogleCloudVisionResponse>();
   const [imageData, setImageData] = useState<ImageData>();
-  const [targetFlow, setTargetFlow] = useState<Adapter>();
+  const [targetFlow, setTargetFlow] = useState<Flow>();
 
   useEffect(() => {
     async function getImageData() {
@@ -114,36 +127,48 @@ const VisionResults = ({}: Props) => {
     getImageData();
   }, []);
 
-  /**
-   * TODO: Open app based on vision results.
-   */
+  const findActionValue = (
+    action: FlowAction,
+    id: string,
+    defaultValue: string
+  ): string =>
+    action?.values?.find((value) => value.id === id)?.value ?? defaultValue;
+
   const openApp = () => {
     (async () => {
-      if (visionResults?.responses && targetFlow) {
-        if (targetFlow) {
-          if (targetFlow.type === AdapterType.URL) {
-            // Todo: extract configuration
+      const action = targetFlow?.action;
+      if (visionResults?.responses && action) {
+        const adapter = action.adapter;
+        if (adapter) {
+          if (adapter.type === AdapterType.URL) {
             const variables: Record<string, string> = {
-              '1': 'Parking',
+              '1': findActionValue(action, '1', 'Note'),
               '2':
                 visionResults?.responses[0]?.textAnnotations[0]?.description ||
                 '',
-              '3': imageData
-                ? `${imageData.latitude}, ${imageData.longitude}`
-                : '',
+              '3':
+                imageData && imageData.latitude && imageData.longitude
+                  ? `${imageData.latitude}, ${imageData.longitude}`
+                  : '',
               '4': getGCalDate(),
-              '5': getGCalDate(60),
+              '5': getGCalDate(30),
             };
             type AdapterUrlType = {
               urlComponents: string[];
             };
-            const variablePattern: RegExp = new RegExp(`^(\\\${)(\\w+)(})\$`);
-            const url = (targetFlow.value as AdapterUrlType).urlComponents
+            const variablePattern: RegExp = new RegExp('^(\\${)(\\w+)(})$');
+            const url = (adapter.value as AdapterUrlType).urlComponents
               .map((component) => {
                 const regExpMatchArray = component.match(variablePattern);
-                console.log(`Matched component ${component}: ${regExpMatchArray}`);
-                if (regExpMatchArray && variables[regExpMatchArray[2]]) {
-                  return variables[regExpMatchArray[2]];
+                console.log(
+                  `Matched component ${component}: ${regExpMatchArray}`
+                );
+                const regexVariableIdx = 2;
+                if (
+                  regExpMatchArray &&
+                  variables[regExpMatchArray[regexVariableIdx]]
+                ) {
+                  return variables[regExpMatchArray[regexVariableIdx]];
                 }
                 return component;
               })
@@ -151,7 +176,7 @@ const VisionResults = ({}: Props) => {
             console.log(`Linking to URL ${url}`);
             Linking.openURL(url);
           } else {
-            console.error(`No adapter for ${targetFlow.type}`);
+            console.error(`No adapter for ${adapter.type}`);
           }
         } else {
           console.error('No adapter configured.');
@@ -172,7 +197,7 @@ const VisionResults = ({}: Props) => {
         style={styles.visionResultsButtonStyle}
         labelStyle={styles.imageButtonsLabelStyle}
       >
-        {`Open ${targetFlow.name}`}
+        {`Open ${targetFlow?.action?.adapter?.name}`}
       </Button>
     ) : (
       <ActivityIndicator />
@@ -180,7 +205,7 @@ const VisionResults = ({}: Props) => {
 
   return (
     <View style={styles.contentStyle}>
-      {VisionResultsPreview(visionResults, targetFlow)}
+      {VisionResultsPreview(visionResults)}
       {startFlowEl}
     </View>
   );

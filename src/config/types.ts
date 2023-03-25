@@ -13,8 +13,15 @@ export interface Adapter {
   value: object;
 }
 
+export interface ActionValue {
+  id: string;
+  value: string;
+}
+
 export interface FlowAction {
   id: AdapterId;
+  adapter?: Adapter;
+  values?: ActionValue[];
 }
 
 export interface Flow {
@@ -24,10 +31,12 @@ export interface Flow {
 }
 
 export interface Config {
+  networkTimeoutInSeconds: number;
   googleCloudImagePath: string;
   googleCloudKeyParam: string;
   googleCloudMaxResults: number;
   googleCloudVisionApi: string;
   adapters: Adapter[];
   flows: Flow[];
+  defaultFlow: Flow;
 }
